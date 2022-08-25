@@ -1,0 +1,16 @@
+@import "~bootstrap/scss/bootstrap";
+
+body {
+    background: #c9d6ff;
+    background: -webkit-linear-gradient(to top, "#c9d6ff", "#e2e2e2");
+    background: linear-gradient(to top, "#c9d6ff", "#e2e2e2");
+    min-height: 100vh;
+}
+
+.brand-wrapper {
+    margin-bottom: 19px;
+
+    .logo {
+        height: 37px;
+    }
+}
