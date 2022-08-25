@@ -16,7 +16,11 @@ class ReportItemOutController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $exitItem = ExitItem::joinAllTable();
+            $value = $request->input('value');
+            $from_date = $request->input('from_date');
+            $to_date = $request->input('to_date');
+
+            $exitItem = ExitItem::joinAllTable(null, null, $value, $from_date, $to_date);
 
             return Datatables::of($exitItem)
                 ->addIndexColumn()
@@ -46,8 +50,38 @@ class ReportItemOutController extends Controller
         if (!Gate::allows('user-admin')) {
             abort(403);
         }
+        $from_date = null;
+        $to_date = null;
+        $value = null;
+        $judulLaporan = '';
+        if (isset($_GET['from_date'])) {
+            $from_date = $request->input('from_date');
+        }
+        if (isset($_GET['to_date'])) {
+            $to_date = $request->input('to_date');
+        }
+        if ($from_date != null && $to_date != null) {
+            $judulLaporan = 'Laporan_Transaksi_Barang_Keluar_Dari_Tanggal_' . $from_date . '_Sampai_Tanggal_' . $to_date;
+        }
+        if (isset($_GET['filter'])) {
+            $value = urldecode($request->input('filter'));
+            switch ($value) {
+                case '-1 days':
+                    $judulLaporan = 'Laporan_1_Hari_Terakhir_Transaksi_Barang_Keluar';
+                    break;
+                case '-7 days':
+                    $judulLaporan = 'Laporan_Seminggu_Terakhir_Transaksi_Barang_Keluar';
+                    break;
+                case '-1 month':
+                    $judulLaporan = 'Laporan_Sebulan_Terakhir_Transaksi_Barang_Keluar';
+                    break;
+                case 'all':
+                    $judulLaporan = 'Laporan_Semua_Transaksi_Barang_Keluar';
+                    break;
+            }
+        }
 
-        $exitItem = ExitItem::joinAllTable();
+        $exitItem = ExitItem::joinAllTable([], null, $value, $from_date, $to_date);
 
         $spreadsheet = new Spreadsheet;
         $spreadsheet->setActiveSheetIndex(0)
@@ -119,7 +153,7 @@ class ReportItemOutController extends Controller
 
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="Laporan_Barang_keluar.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $judulLaporan . '.xlsx"');
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');

@@ -11,6 +11,7 @@
         "php": "^7.3|^8.0",
         "barryvdh/laravel-dompdf": "^2.0",
         "davejamesmiller/laravel-breadcrumbs": "5.x",
+        "eternicode/bootstrap-datepicker": "^1.9",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/fortify": "^1.13",
@@ -64,7 +65,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "robloach/component-installer": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

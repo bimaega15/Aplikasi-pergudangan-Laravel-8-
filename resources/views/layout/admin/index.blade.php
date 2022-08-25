@@ -24,6 +24,8 @@ $configuration = CheckHelp::configuration();
     <link href="{{ asset('backend/xhtml') }}/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="{{ asset('library/photoviewer-master') }}/dist/photoviewer.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('library/select2-develop') }}/dist/css/select2.min.css">
+    <link rel="stylesheet"
+        href="{{ asset('library/bootstrap-datepicker-master/dist/css/bootstrap-datepicker.min.css') }}">
     @stack('css')
 </head>
 
@@ -82,6 +84,7 @@ $configuration = CheckHelp::configuration();
     <script src="{{ asset('backend/xhtml') }}/js/plugins-init/datatables.init.js"></script>
     <script src="{{ asset('library/photoviewer-master') }}/dist/photoviewer.js"></script>
     <script src="{{ asset('library/select2-develop') }}/dist/js/select2.min.js"></script>
+    <script src="{{ asset('library/bootstrap-datepicker-master/dist/js/bootstrap-datepicker.min.js') }}"></script>
     <script>
         $(document).ready(function(){
             $.ajaxSetup({

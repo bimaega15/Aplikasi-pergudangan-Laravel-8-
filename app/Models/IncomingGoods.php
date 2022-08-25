@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class IncomingGoods extends Model
 {
@@ -11,7 +12,7 @@ class IncomingGoods extends Model
     protected $table = 'incoming_goods';
     protected $guarded = ['id'];
 
-    public static function joinAllTable($id = [], $single_id = null)
+    public static function joinAllTable($id = [], $single_id = null, $value = null, $from_date = null, $to_date = null)
     {
         $get = IncomingGoods::join('stock_store as ss', 'ss.id', '=', 'incoming_goods.stock_store_id')
             ->leftJoin('location as lc', 'lc.id', '=', 'ss.location_id')
@@ -27,6 +28,17 @@ class IncomingGoods extends Model
         if ($single_id != null) {
             $get = $get->where('incoming_goods.id', $single_id);
             return $get->first();
+        }
+        if ($value != null && $value != 'all') {
+            $dateFirst = date('Y-m-d');
+            $lessDate = date('Y-m-d', strtotime($value, strtotime($dateFirst)));
+            $get = $get->whereBetween(DB::raw('DATE_FORMAT(incoming_goods.date_of_entry_incoming_goods, "%Y-%m-%d")'), [$lessDate, $dateFirst]);
+        }
+        if ($from_date != null && $to_date != null) {
+            $dateFirst = date('Y-m-d', strtotime($from_date));
+            $dateLast = date('Y-m-d', strtotime($to_date));
+
+            $get = $get->whereBetween(DB::raw('DATE_FORMAT(incoming_goods.date_of_entry_incoming_goods, "%Y-%m-%d")'), [$dateFirst, $dateLast]);
         }
         return $get->get();
     }

@@ -54,6 +54,12 @@ Laporan Transaksi barang keluar page
     .photoviewer-footer .photoviewer-button:hover {
         color: white;
     }
+
+
+    .btn-active {
+        background-color: #3054e3 !important;
+        color: white !important;
+    }
 </style>
 @endpush
 <!--**********************************
@@ -75,9 +81,50 @@ Laporan Transaksi barang keluar page
                         <h4 class="card-title">Laporan Transaksi Barang Keluar</h4>
                     </div>
                     <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-lg-12">
+                                <a href="#" class="badge badge-light btn-all">
+                                    Semua
+                                </a>
+                                <a href="#" class="badge badge-light btn-yesterday">
+                                    1 Hari Terakhir
+                                </a>
+                                <a href="#" class="badge badge-light btn-last-week">
+                                    Seminggu Terakhir
+                                </a>
+                                <a href="#" class="badge badge-light btn-last-month">
+                                    Sebulan Terakhir
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-lg-5">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control from_date"
+                                                placeholder="Dari tanggal">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control to_date" placeholder="Dari tanggal">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-primary btm-sm btn-filter">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         @can('user-admin')
                         <div class="mb-2">
-                            <a href="{{ route('admin.reportItemOut.export') }}" class="btn btn-success">
+                            <a href="{{ route('admin.reportItemOut.export') }}" class="btn btn-success btn-export">
                                 <i class="fas fa-file-excel"></i> Export Excel
                             </a>
                         </div>
@@ -114,23 +161,34 @@ Laporan Transaksi barang keluar page
 @push('js')
 <script>
     $(document).ready(function(e){
-        var table = $('#dataTable').DataTable({
-            ajax: {
-                url: '{{route("admin.exitItem.index")}}'
-            },
-            processing: true,
-            serverSide: true,
-            columns: [
-                {data: 'DT_RowIndex', name: 'no'},
-                {data: 'out_date_exit_item', name: 'out_date_exit_item'},
-                {data: 'name_location', name: 'name_location'},
-                {data: 'code_item', name: 'code_item'},
-                {data: 'name_item', name: 'name_item'},
-                {data: 'name_unite_type', name: 'name_unite_type'},
-                {data: 'stock_exit_item', name: 'stock_exit_item'},
-                {data: 'picture_item', name: 'picture_item', orderable: false, searchable: false},
-            ]
-        });
+        loadTableAjax();
+        function loadTableAjax(value = null, from_date = null, to_date = null)
+        {
+            var table = $('#dataTable').DataTable({
+                ajax: {
+                    url: '{{route("admin.reportItemOut.index")}}',
+                    dataType: 'json',
+                    data: {
+                        value: value,
+                        from_date: from_date,
+                        to_date: to_date
+                    },
+                },
+                processing: true,
+                serverSide: true,
+                columns: [
+                    {data: 'DT_RowIndex', name: 'no'},
+                    {data: 'out_date_exit_item', name: 'out_date_exit_item'},
+                    {data: 'name_location', name: 'name_location'},
+                    {data: 'code_item', name: 'code_item'},
+                    {data: 'name_item', name: 'name_item'},
+                    {data: 'name_unite_type', name: 'name_unite_type'},
+                    {data: 'stock_exit_item', name: 'stock_exit_item'},
+                    {data: 'picture_item', name: 'picture_item', orderable: false, searchable: false},
+                ]
+            });
+            return table;
+        }
 
           // initialize manually with a list of links
           $(document).on('click','[data-gallery="photoviewer"]',function (e) {
@@ -149,6 +207,108 @@ Laporan Transaksi barang keluar page
 
                 new PhotoViewer(items, options);
             });
+        
+            $('.from_date').datepicker({
+            todayBtn:  true,
+            todayHighlight: true,
+            format: 'dd-mm-yyyy'
+        });
+        
+        $('.to_date').datepicker({
+            todayBtn:  true,
+            todayHighlight: true,
+            format: 'dd-mm-yyyy'
+        });
+
+        $(document).on('click','.btn-filter',function(e){
+            e.preventDefault();
+            let from_date = $('.from_date').val();
+            let error = false;
+            if(from_date == null || from_date == ''){
+                error = true;
+                alert('Dari tanggal tidak boleh kosong');
+            }
+
+            let to_date = $('.to_date').val();
+            if(to_date == null || to_date == ''){
+                error = true;
+                alert('Sampai tanggal tidak boleh kosong');
+            }
+            if(error){
+                return;
+            }
+
+            $('#dataTable').DataTable().destroy();
+            loadTableAjax(null, from_date, to_date);
+
+            let href = "{{ route('admin.reportItemOut.export') }}";
+            href += '?from_date='+from_date+'&to_date='+to_date;
+            $('.btn-export').attr('href', href);
+        })
+
+        $(document).on('click','.btn-all',function(e){
+            e.preventDefault();
+            $(this).addClass("btn-active");
+            $('.btn-yesterday').removeClass('btn-active');
+            $('.btn-last-week').removeClass('btn-active');
+            $('.btn-last-month').removeClass('btn-active');
+
+            $('#dataTable').DataTable().destroy();
+            let value = 'all';
+            loadTableAjax(value);
+
+            let href = "{{ route('admin.reportItemOut.export') }}";
+            href += '?filter='+encodeURI(value);
+            $('.btn-export').attr('href', href);
+        })
+
+        $(document).on('click','.btn-yesterday',function(e){
+            e.preventDefault();
+            $(this).addClass("btn-active");
+            $('.btn-all').removeClass('btn-active');
+            $('.btn-last-week').removeClass('btn-active');
+            $('.btn-last-month').removeClass('btn-active');
+
+            $('#dataTable').DataTable().destroy();
+            let value = '-1 days';
+            loadTableAjax(value);
+
+            let href = "{{ route('admin.reportItemOut.export') }}";
+            href += '?filter='+encodeURI(value);
+            $('.btn-export').attr('href', href);
+        })
+
+        $(document).on('click','.btn-last-week',function(e){
+            e.preventDefault();
+            $(this).addClass("btn-active");
+            $('.btn-yesterday').removeClass('btn-active');
+            $('.btn-all').removeClass('btn-active');
+            $('.btn-last-month').removeClass('btn-active');
+
+            $('#dataTable').DataTable().destroy();
+            let value = '-7 days';
+            loadTableAjax(value);
+
+            let href = "{{ route('admin.reportItemOut.export') }}";
+            href += '?filter='+encodeURI(value);
+            $('.btn-export').attr('href', href);
+        })
+
+        $(document).on('click','.btn-last-month',function(e){
+            e.preventDefault();
+            $(this).addClass("btn-active");
+            $('.btn-yesterday').removeClass('btn-active');
+            $('.btn-last-week').removeClass('btn-active');
+            $('.btn-all').removeClass('btn-active');
+
+            $('#dataTable').DataTable().destroy();
+            let value = '-1 month';
+            loadTableAjax(value);
+
+            let href = "{{ route('admin.reportItemOut.export') }}";
+            href += '?filter='+encodeURI(value);
+            $('.btn-export').attr('href', href);
+        })
     })
 </script>
 @endpush
